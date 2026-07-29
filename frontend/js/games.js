@@ -159,16 +159,21 @@ class GameEngine {
     else if (percentage >= 30) starsEarned = 2;
     else starsEarned = 1;
 
-    let currentStars = 25;
+    let currentStars = 0;
     if (typeof app !== 'undefined') {
       currentStars = app.getStarBalance();
-      app.setStarBalance(currentStars + starsEarned);
-    } else {
-      const existing = parseInt(localStorage.getItem('odia_guest_stars') || '25', 10);
-      localStorage.setItem('odia_guest_stars', (existing + starsEarned).toString());
+      const userKey = app.getUserStarsKey();
+      if (userKey) {
+        app.setStarBalance(currentStars + starsEarned);
+        const user = (typeof authManager !== 'undefined') ? authManager.currentUser : JSON.parse(localStorage.getItem('odia_user_cache') || 'null');
+        if (user) {
+          const gamesKey = 'odia_games_played_' + (user.email || user.id || user.name);
+          const currentGames = parseInt(localStorage.getItem(gamesKey) || '0', 10);
+          localStorage.setItem(gamesKey, (currentGames + 1).toString());
+        }
+      }
+      app.updateHeaderStats();
     }
-
-    app.updateHeaderStats();
 
     container.innerHTML = `
       <div class="result-card animate-pop" style="text-align:center; padding:32px 20px; background:#FFFFFF; border-radius:20px; box-shadow:var(--shadow-lg); border:3px solid #4F46E5; margin-top:20px;">

@@ -13,6 +13,8 @@ class AppController {
   }
 
   init() {
+    localStorage.removeItem('odia_guest_stars');
+    localStorage.removeItem('odia_unlocked_prizes');
     this.setupEventListeners();
     this.updateHeaderStats();
     this.navigateTo('view-home');
@@ -39,33 +41,44 @@ class AppController {
     if (user && (user.email || user.id || user.name)) {
       return 'odia_stars_' + (user.email || user.id || user.name);
     }
-    return 'odia_guest_stars';
+    return null;
+  }
+
+  getUserPrizesKey() {
+    const user = (typeof authManager !== 'undefined') ? authManager.currentUser : JSON.parse(localStorage.getItem('odia_user_cache') || 'null');
+    if (user && (user.email || user.id || user.name)) {
+      return 'odia_prizes_' + (user.email || user.id || user.name);
+    }
+    return null;
+  }
+
+  getUnlockedPrizes() {
+    const key = this.getUserPrizesKey();
+    if (!key) return [];
+    return JSON.parse(localStorage.getItem(key) || '[]');
   }
 
   getStarBalance() {
     const key = this.getUserStarsKey();
+    if (!key) {
+      return 0;
+    }
     const currentAccountStars = localStorage.getItem(key);
-    const guestStars = localStorage.getItem('odia_guest_stars');
-    
     if (currentAccountStars !== null) {
       return parseInt(currentAccountStars, 10);
     }
-    if (guestStars !== null) {
-      // Migrate guest stars to current account so stars are preserved!
-      localStorage.setItem(key, guestStars);
-      return parseInt(guestStars, 10);
-    }
-    // Default starting stars
-    localStorage.setItem(key, '25');
-    localStorage.setItem('odia_guest_stars', '25');
-    return 25;
+    localStorage.setItem(key, '0');
+    return 0;
   }
 
   setStarBalance(newStars) {
     const key = this.getUserStarsKey();
+    if (!key) {
+      this.updateHeaderStats();
+      return;
+    }
     const val = Math.max(0, newStars).toString();
     localStorage.setItem(key, val);
-    localStorage.setItem('odia_guest_stars', val);
     this.updateHeaderStats();
   }
 
@@ -156,7 +169,7 @@ class AppController {
 
     const profileName = localStorage.getItem('odia_profile_name') || 'Guest (ଅତିଥି)';
     const totalStars = this.getStarBalance();
-    const unlockedPrizes = JSON.parse(localStorage.getItem('odia_unlocked_prizes') || '[]');
+    const unlockedPrizes = this.getUnlockedPrizes();
     const currentClass = this.selectedClassNumber || 1;
 
     const classes = [
@@ -513,7 +526,7 @@ class AppController {
       ? authManager.currentUser
       : JSON.parse(localStorage.getItem('odia_user_cache') || 'null');
 
-    const currentLiveStars = parseInt(localStorage.getItem('odia_guest_stars') || '0', 10);
+    const currentLiveStars = this.getStarBalance();
     const currentClassLevel = `ଶ୍ରେଣୀ ${this.selectedClassNumber || 1}`;
 
     let leaders = [];
@@ -613,7 +626,7 @@ class AppController {
     if (!container) return;
 
     const profileName = localStorage.getItem('odia_profile_name') || 'Guest (ଅତିଥି)';
-    const totalStars = parseInt(localStorage.getItem('odia_guest_stars') || '0', 10);
+    const totalStars = this.getStarBalance();
     const selectedClass = this.selectedClassNumber || 1;
 
     const skills = [
@@ -810,14 +823,23 @@ class AppController {
 
   renderRewardsView() {
     const totalStars = this.getStarBalance();
-    const unlockedPrizes = JSON.parse(localStorage.getItem('odia_unlocked_prizes') || '[]');
+    const unlockedPrizes = this.getUnlockedPrizes();
+    const userKey = this.getUserStarsKey();
 
     const totalStarsEl = document.getElementById('rewards-total-stars');
     const totalGamesEl = document.getElementById('rewards-total-games');
     const unlockedCountEl = document.getElementById('rewards-unlocked-count');
 
+    let totalGames = 0;
+    if (userKey) {
+      const user = (typeof authManager !== 'undefined') ? authManager.currentUser : JSON.parse(localStorage.getItem('odia_user_cache') || 'null');
+      if (user) {
+        totalGames = parseInt(localStorage.getItem('odia_games_played_' + (user.email || user.id || user.name)) || '0', 10);
+      }
+    }
+
     if (totalStarsEl) totalStarsEl.textContent = totalStars;
-    if (totalGamesEl) totalGamesEl.textContent = Math.max(1, Math.floor(totalStars / 10));
+    if (totalGamesEl) totalGamesEl.textContent = totalGames;
     if (unlockedCountEl) unlockedCountEl.textContent = unlockedPrizes.length;
 
     // Render Prizes Grid
@@ -896,12 +918,13 @@ class AppController {
       return;
     }
 
-    const unlockedPrizes = JSON.parse(localStorage.getItem('odia_unlocked_prizes') || '[]');
+    const unlockedPrizes = this.getUnlockedPrizes();
     let newStars = totalStars;
 
     if (!unlockedPrizes.includes(prizeId)) {
       unlockedPrizes.push(prizeId);
-      localStorage.setItem('odia_unlocked_prizes', JSON.stringify(unlockedPrizes));
+      const prizeKey = this.getUserPrizesKey();
+      if (prizeKey) localStorage.setItem(prizeKey, JSON.stringify(unlockedPrizes));
 
       // Deduct prize cost from student's star balance
       newStars = Math.max(0, totalStars - prize.cost);
@@ -929,8 +952,8 @@ class AppController {
     if (!container) return;
 
     const profileName = localStorage.getItem('odia_profile_name') || 'Guest (ଅତିଥି)';
-    const totalStars = parseInt(localStorage.getItem('odia_guest_stars') || '0', 10);
-    const unlockedPrizes = JSON.parse(localStorage.getItem('odia_unlocked_prizes') || '[]');
+    const totalStars = this.getStarBalance();
+    const unlockedPrizes = this.getUnlockedPrizes();
     const selectedClass = this.selectedClassNumber || 1;
     const currentAvatar = localStorage.getItem('odia_profile_avatar') || '👤';
 
@@ -1060,7 +1083,8 @@ class AppController {
 
   confirmResetProgress() {
     if (confirm('ଆପଣ ସତରେ ଆପଣଙ୍କର ଗେମ୍ ପ୍ରଗତି ରିସେଟ୍ କରିବାକୁ ଚାହାଁନ୍ତି କି?')) {
-      localStorage.removeItem('odia_guest_stars');
+      const key = this.getUserStarsKey();
+      if (key) localStorage.removeItem(key);
       localStorage.removeItem('odia_unlocked_prizes');
       this.updateHeaderStats();
       this.renderProfileView();

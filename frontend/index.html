@@ -8,6 +8,46 @@
 </head>
 <body>
 
+  <!-- Animated Cute Animals Background Layer -->
+  <div id="animal-background-layer" class="animal-bg-container">
+    <div class="bg-animal animal-panda" title="Playful Panda 🐼">
+      <span class="animal-emoji">🐼</span>
+      <span class="animal-toy">⚽</span>
+    </div>
+    <div class="bg-animal animal-puppy" title="Happy Puppy 🐶">
+      <span class="animal-emoji">🐶</span>
+      <span class="animal-toy">🦴</span>
+    </div>
+    <div class="bg-animal animal-bunny" title="Hopping Bunny 🐰">
+      <span class="animal-emoji">🐰</span>
+      <span class="animal-toy">🥕</span>
+    </div>
+    <div class="bg-animal animal-kitty" title="Peeking Kitty 🐱">
+      <span class="animal-emoji">🐱</span>
+      <span class="animal-toy">🧶</span>
+    </div>
+    <div class="bg-animal animal-lion" title="Cute Lion 🦁">
+      <span class="animal-emoji">🦁</span>
+      <span class="animal-toy">👑</span>
+    </div>
+    <div class="bg-animal animal-elephant" title="Bubbling Elephant 🐘">
+      <span class="animal-emoji">🐘</span>
+      <span class="animal-toy">🫧</span>
+    </div>
+    <div class="bg-animal animal-monkey" title="Dancing Monkey 🐒">
+      <span class="animal-emoji">🐒</span>
+      <span class="animal-toy">🍌</span>
+    </div>
+
+    <!-- Floating Toys & Balloons -->
+    <div class="bg-floating-toy toy-balloon-1">🎈</div>
+    <div class="bg-floating-toy toy-balloon-2">🎨</div>
+    <div class="bg-floating-toy toy-star-1">⭐</div>
+    <div class="bg-floating-toy toy-paw-1">🐾</div>
+    <div class="bg-floating-toy toy-paw-2">🐾</div>
+    <div class="bg-floating-toy toy-heart-1">💖</div>
+  </div>
+
   <!-- Top Application Header -->
   <header class="app-header">
     <div class="container header-inner">
@@ -26,7 +66,7 @@
         </div>
         <div class="star-pill">
           <span>⭐</span>
-          <span id="header-star-count">5</span>
+          <span id="header-star-count">0</span>
         </div>
         <div class="profile-pill" onclick="app.navigateTo('view-profile')">
           <span>👤</span>
@@ -396,6 +436,12 @@
 
   <!-- Victory Celebration Overlay Modal -->
   <div id="victory-modal" class="modal-container hidden"></div>
+
+  <!-- Firebase SDKs (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
 
   <!-- JavaScript Scripts -->
   <script src="js/api.js"></script>
