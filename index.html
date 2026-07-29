@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="or">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Learning Games – Class 1 to 5 | ଖେଳି ଖେଳି ଶିଖ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Application Header -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="logo-group" onclick="app.navigateTo('view-home')">
+        <span class="logo-icon">🎮</span>
+        <div class="app-title-text">
+          <span class="title-odia">ଓଡ଼ିଆ ମାଧ୍ୟମ</span>
+          <span class="title-en">Learning Games</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="status-pill online" id="header-status-pill">
+          <span class="status-dot">🟢</span>
+          <span id="header-status-text">ସର୍ଭର ସହ ଯୋଡ଼ିହୋଇଛି</span>
+        </div>
+        <div class="star-pill">
+          <span>⭐</span>
+          <span id="header-star-count">5</span>
+        </div>
+        <div class="profile-pill" onclick="app.navigateTo('view-profile')">
+          <span>👤</span>
+          <span id="header-profile-name">Guest (ଅତିଥି)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Canvas for Victory Confetti -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Custom Toast Notification -->
+  <div id="custom-toast" class="custom-toast hidden"></div>
+
+  <!-- Main View Container -->
+  <main class="container">
+
+    <!-- 1. HOME VIEW (CLASS SELECTION MAIN DASHBOARD) -->
+    <section id="view-home" class="app-view">
+      <div id="home-dashboard-container">
+        <!-- Dynamically rendered by JS in renderHomeView() -->
+      </div>
+    </section>
+
+    <!-- 2. LEARN VIEW (ଶିଖନ୍ତୁ) -->
+    <section id="view-learn" class="app-view hidden">
+      <div id="learn-dashboard-container">
+        <!-- Dynamically rendered by JS in renderLearnView() -->
+      </div>
+    </section>
+
+    <!-- 3. CLASS SELECTION VIEW -->
+    <section id="view-class-select" class="app-view hidden">
+      <div style="margin-bottom: 16px;">
+        <button class="btn btn-outline btn-sm" onclick="app.navigateTo('view-home')">
+          ⬅️ ହୋମ୍‌କୁ ଫେରନ୍ତୁ
+        </button>
+      </div>
+      <h2 class="section-heading">ଆପଣଙ୍କ ଶ୍ରେଣୀ ବାଛନ୍ତୁ 🏫</h2>
+      <div class="class-cards-grid">
+        <!-- Dynamically rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 4. SUBJECT SELECTION VIEW -->
+    <section id="view-subject-select" class="app-view hidden">
+      <div style="margin-bottom: 16px;">
+        <button class="btn btn-outline btn-sm" onclick="app.navigateTo('view-home')">
+          ⬅️ ଶ୍ରେଣୀ ପରିବର୍ତ୍ତନ କରନ୍ତୁ
+        </button>
+      </div>
+      <h2 id="subject-class-heading" class="section-heading">ବିଷୟ ବାଛନ୍ତୁ 📚</h2>
+      <div id="subject-cards-grid" class="subject-cards-grid">
+        <!-- Dynamically rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 5. CHAPTER & GAME SELECTION VIEW -->
+    <section id="view-chapter-select" class="app-view hidden">
+      <div style="margin-bottom: 16px;">
+        <button class="btn btn-outline btn-sm" onclick="app.navigateTo('view-subject-select')">
+          ⬅️ ବିଷୟ ସୂଚୀକୁ ଫେରନ୍ତୁ
+        </button>
+      </div>
+      <h2 id="chapter-subject-title" class="section-heading">ଅଧ୍ୟାୟ ବାଛନ୍ତୁ 🎯</h2>
+      <div id="chapter-list-grid" class="chapter-list-grid">
+        <!-- Dynamically rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 6. GAME VIEW -->
+    <section id="view-game" class="app-view hidden">
+      <div class="game-top-bar">
+        <div class="game-header-info">
+          <button class="back-btn" onclick="app.navigateTo('view-chapter-select')">⬅️ ପଛକୁ</button>
+          <span id="game-title" class="game-title">ଖେଳ</span>
+          <span id="game-live-score" class="live-score">⭐ 0</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="game-progress-bar" class="progress-bar-fill" style="width: 0%"></div>
+        </div>
+        <div style="text-align: right; font-size: 0.85rem; font-weight: 700; margin-top: 4px; color: var(--color-text-muted);">
+          <span id="game-progress-text">ପ୍ରଶ୍ନ: ୧/୧୦</span>
+        </div>
+      </div>
+
+      <div id="game-content-area"></div>
+    </section>
+
+    <!-- 7. LEADERBOARD VIEW (ଲିଡରବୋର୍ଡ) -->
+    <section id="view-leaderboard" class="app-view hidden">
+      <div class="rewards-trophy-banner animate-pop" style="background: linear-gradient(135deg, #A55EEA 0%, #45AAF2 100%);">
+        <div class="trophy-glow">🏆</div>
+        <h2 class="trophy-title">ଲିଡରବୋର୍ଡ (Leaderboard)</h2>
+        <p class="trophy-subtitle">ସବୁଠାରୁ ଆଗରେ ଥିବା ପ୍ରତିଭାବାନ୍ ଛାତ୍ରଛାତ୍ରୀ!</p>
+      </div>
+
+      <div id="leaderboard-list-grid" class="chapter-list-grid" style="margin-top: 20px;">
+        <!-- Dynamically rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 8. REWARDS & PRIZES VIEW -->
+    <section id="view-rewards" class="app-view hidden">
+      <!-- Top Hero Banner -->
+      <div class="rewards-hero-banner animate-pop">
+        <div class="hero-trophy-glow">🏆</div>
+        <div class="hero-banner-text">
+          <h2 class="hero-title">ମୋର ପୁରସ୍କାର ଓ ବ୍ୟାଜ୍ 🎁</h2>
+          <p class="hero-subtitle" id="rewards-motivation">ଖେଳି ଶିଖନ୍ତୁ, ଷ୍ଟାର୍ ଜିତନ୍ତୁ ଓ ଆକର୍ଷଣୀୟ ପୁରସ୍କାର ଅନ୍‌ଲକ୍ କରନ୍ତୁ!</p>
+        </div>
+      </div>
+
+      <!-- Stats Card Bar -->
+      <div class="rewards-stats-card animate-pop">
+        <div class="reward-stat-box">
+          <span class="stat-emoji">⭐</span>
+          <div>
+            <div id="rewards-total-stars" class="stat-number">0</div>
+            <div class="stat-text">ମୋଟ ଷ୍ଟାର୍ (Stars)</div>
+          </div>
+        </div>
+        <div class="stat-v-divider"></div>
+        <div class="reward-stat-box">
+          <div class="stat-emoji">🎯</div>
+          <div>
+            <div id="rewards-total-games" class="stat-number">0</div>
+            <div class="stat-text">ଖେଳାଯାଇଥିବା ଖେଳ</div>
+          </div>
+        </div>
+        <div class="stat-v-divider"></div>
+        <div class="reward-stat-box">
+          <div class="stat-emoji">🎁</div>
+          <div>
+            <div id="rewards-unlocked-count" class="stat-number">0</div>
+            <div class="stat-text">ଅନ୍‌ଲକ୍ ପୁରସ୍କାର</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prize Store Section -->
+      <div class="rewards-section-header">
+        <h3 class="rewards-section-title">🎁 ପୁରସ୍କାର ଷ୍ଟୋର୍ (Prize Store)</h3>
+        <span class="rewards-section-sub">ଷ୍ଟାର୍ ସଂଗ୍ରହ କରି ନିଜର ଆକର୍ଷଣୀୟ ପୁରସ୍କାର ଅନ୍‌ଲକ୍ କରନ୍ତୁ</span>
+      </div>
+      <div id="prizes-grid" class="prizes-grid">
+        <!-- Dynamically rendered by JS -->
+      </div>
+
+      <!-- Badges Section -->
+      <div class="rewards-section-header" style="margin-top: 36px;">
+        <h3 class="rewards-section-title">🎖️ ମୋର ବ୍ୟାଜ୍ (My Badges)</h3>
+        <span class="rewards-section-sub">ଖେଳ ଜିତି ଶ୍ରେଷ୍ଠ ବ୍ୟାଜ୍ ହାସଲ କରନ୍ତୁ</span>
+      </div>
+      <div id="badges-grid" class="badges-grid">
+        <!-- Dynamically rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 9. PROFILE VIEW -->
+    <section id="view-profile" class="app-view hidden">
+      <div id="profile-dashboard-container">
+        <!-- Dynamically rendered by JS in renderProfileView() -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Mobile Navigation Bar -->
+  <nav class="bottom-nav">
+    <button class="bottom-nav-item active" data-view="view-home">
+      <span class="bottom-nav-icon">🏠</span>
+      <span>ହୋମ୍</span>
+    </button>
+    <button class="bottom-nav-item" data-view="view-learn">
+      <span class="bottom-nav-icon">📚</span>
+      <span>ଶିଖନ୍ତୁ</span>
+    </button>
+    <button class="bottom-nav-item" data-view="view-leaderboard">
+      <span class="bottom-nav-icon">🏆</span>
+      <span>ଲିଡରବୋର୍ଡ</span>
+    </button>
+    <button class="bottom-nav-item" data-view="view-rewards">
+      <span class="bottom-nav-icon">🎖️</span>
+      <span>ପୁରସ୍କାର</span>
+    </button>
+    <button class="bottom-nav-item" data-view="view-profile">
+      <span class="bottom-nav-icon">👤</span>
+      <span>ପ୍ରୋଫାଇଲ୍</span>
+    </button>
+  </nav>
+
+  
+  <!-- Gmail-Style Auth & Profile Modal -->
+  <div id="auth-modal" class="modal-overlay hidden" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+    <div class="animate-pop" style="background: #FFFFFF; border-radius: 28px; width: 100%; max-width: 440px; border: 3px solid #6366F1; box-shadow: 0 20px 40px rgba(0,0,0,0.25); overflow: hidden; position: relative;">
+      
+      <!-- Close Button -->
+      <button id="auth-modal-close" onclick="authManager.hideAuthModal()" style="position: absolute; right: 18px; top: 18px; background: #F1F5F9; border: none; font-size: 1.2rem; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-weight: 800; color: #64748B; z-index: 10;">
+        ✕
+      </button>
+
+      <!-- Modal Header / Tabs -->
+      <div style="background: linear-gradient(135deg, #4F46E5, #7C3AED); padding: 24px 20px 20px 20px; color: white; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 8px;" id="auth-modal-avatar">👤</div>
+        <h3 id="auth-modal-title" style="font-size: 1.4rem; font-weight: 900; margin: 0;">ଆକାଉଣ୍ଟ ସେଟିଂସ</h3>
+        <p id="auth-modal-subtitle" style="font-size: 0.88rem; opacity: 0.9; margin: 4px 0 0 0; font-weight: 600;">ଓଡ଼ିଆ ମାଧ୍ୟମ Learning Games Portal</p>
+        
+        <!-- Tab Switching Buttons (Login / Sign Up) -->
+        <div id="auth-tab-bar" style="display: flex; gap: 8px; margin-top: 16px; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 50px; backdrop-filter: blur(10px);">
+          <button id="tab-btn-login" class="btn active" style="flex: 1; border-radius: 50px; padding: 8px; font-weight: 800; font-size: 0.88rem; border: none; cursor: pointer; background: white; color: #4F46E5;">
+            🔑 ଲଗଇନ୍
+          </button>
+          <button id="tab-btn-register" class="btn" style="flex: 1; border-radius: 50px; padding: 8px; font-weight: 800; font-size: 0.88rem; border: none; cursor: pointer; background: transparent; color: white;">
+            ✨ ସାଇନ୍ ଅପ୍
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body Content -->
+      <div style="padding: 24px;">
+        
+        <!-- Login Form -->
+        <form id="form-login">
+          <div style="margin-bottom: 14px;">
+            <label style="font-weight: 800; font-size: 0.88rem; color: #475569; display: block; margin-bottom: 6px;">ଇମେଲ୍ (Email):</label>
+            <input type="email" id="login-email" class="form-input" placeholder="example@gmail.com" required style="width: 100%; padding: 12px 16px; border-radius: 16px; border: 2px solid #CBD5E1; font-weight: 700;">
+          </div>
+          <div style="margin-bottom: 18px;">
+            <label style="font-weight: 800; font-size: 0.88rem; color: #475569; display: block; margin-bottom: 6px;">ପାସ୍‌ୱାର୍ଡ (Password):</label>
+            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required style="width: 100%; padding: 12px 16px; border-radius: 16px; border: 2px solid #CBD5E1; font-weight: 700;">
+          </div>
+          <div id="login-error-msg" style="color: #EF4444; font-weight: 800; font-size: 0.85rem; margin-bottom: 12px; text-align: center;"></div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: 50px; padding: 12px; font-weight: 900; font-size: 1rem;">
+            🔑 ଲଗଇନ୍ କରନ୍ତୁ
+          </button>
+        </form>
+
+        <!-- Register / Sign Up Form -->
+        <form id="form-register" class="hidden">
+          <div style="margin-bottom: 12px;">
+            <label style="font-weight: 800; font-size: 0.85rem; color: #475569; display: block; margin-bottom: 4px;">ଛାତ୍ର/ଛାତ୍ରୀଙ୍କ ନାମ (Name):</label>
+            <input type="text" id="reg-name" class="form-input" placeholder="ଆପଣଙ୍କ ନାମ (Your Name)" required style="width: 100%; padding: 10px 14px; border-radius: 14px; border: 2px solid #CBD5E1; font-weight: 700;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-weight: 800; font-size: 0.85rem; color: #475569; display: block; margin-bottom: 4px;">ଇମେଲ୍ (Email):</label>
+            <input type="email" id="reg-email" class="form-input" placeholder="student@gmail.com" required style="width: 100%; padding: 10px 14px; border-radius: 14px; border: 2px solid #CBD5E1; font-weight: 700;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-weight: 800; font-size: 0.85rem; color: #475569; display: block; margin-bottom: 4px;">ପାସ୍‌ୱାର୍ଡ (Password):</label>
+            <input type="password" id="reg-password" class="form-input" placeholder="••••••••" required style="width: 100%; padding: 10px 14px; border-radius: 14px; border: 2px solid #CBD5E1; font-weight: 700;">
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="font-weight: 800; font-size: 0.85rem; color: #475569; display: block; margin-bottom: 4px;">ଶ୍ରେଣୀ (Class):</label>
+            <select id="reg-class" class="form-input" style="width: 100%; padding: 10px 14px; border-radius: 14px; border: 2px solid #CBD5E1; font-weight: 700;">
+              <option value="1">ଶ୍ରେଣୀ ୧ (Class 1)</option>
+              <option value="2">ଶ୍ରେଣୀ ୨ (Class 2)</option>
+              <option value="3">ଶ୍ରେଣୀ ୩ (Class 3)</option>
+              <option value="4">ଶ୍ରେଣୀ ୪ (Class 4)</option>
+              <option value="5">ଶ୍ରେଣୀ ୫ (Class 5)</option>
+            </select>
+          </div>
+          <div id="reg-error-msg" style="color: #EF4444; font-weight: 800; font-size: 0.85rem; margin-bottom: 12px; text-align: center;"></div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: 50px; padding: 12px; font-weight: 900; font-size: 1rem;">
+            ✨ ସାଇନ୍ ଅପ୍ କରନ୍ତୁ
+          </button>
+        </form>
+
+        <!-- Logged-In User Profile Menu (Gmail Style Logout Menu!) -->
+        <div id="user-profile-menu" class="hidden" style="text-align: center;">
+          <div style="background: #F8FAFC; border-radius: 20px; padding: 18px; border: 2px solid #E2E8F0; margin-bottom: 18px;">
+            <div id="user-menu-email" style="font-weight: 800; color: #64748B; font-size: 0.9rem;">student@gmail.com</div>
+            <div id="user-menu-role" style="font-weight: 700; color: #4F46E5; font-size: 0.82rem; margin-top: 4px;">🎓 SCERT Odia Medium Student</div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+            <button class="btn btn-outline" onclick="authManager.hideAuthModal(); app.navigateTo('view-profile');" style="flex: 1; border-radius: 50px; font-weight: 800;">
+              👤 ପ୍ରୋଫାଇଲ୍
+            </button>
+            <button class="btn btn-outline" onclick="authManager.hideAuthModal(); app.navigateTo('view-rewards');" style="flex: 1; border-radius: 50px; font-weight: 800;">
+              🏆 ପୁରସ୍କାର
+            </button>
+          </div>
+
+          <!-- LOGOUT BUTTON -->
+          <button class="btn btn-danger" onclick="authManager.logout()" style="width: 100%; border-radius: 50px; padding: 12px; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            🚪 ଲଗଆଉଟ୍ (Logout)
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  
+  <!-- Cartoon Welcome Intro Overlay -->
+  <div id="welcome-intro-overlay" style="position: fixed; inset: 0; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 28px 18px; overflow: hidden; color: white;">
+    
+    <!-- Skip Pill Button -->
+    <button id="intro-skip-btn" class="intro-skip-pill">
+      <span>⏩ Skip (ଡିଙ୍ଗନ୍ତୁ)</span>
+    </button>
+
+    <!-- Animated Floating Background Toys & Stars -->
+    <div class="intro-floating-bg">
+      <div class="float-item i1">🎈</div>
+      <div class="float-item i2">⭐</div>
+      <div class="float-item i3">🎨</div>
+      <div class="float-item i4">🚀</div>
+      <div class="float-item i5">🔢</div>
+      <div class="float-item i6">🏆</div>
+    </div>
+
+    <!-- Top Cartoon Header Title -->
+    <div style="text-align: center; margin-top: 30px; z-index: 2005; position: relative;">
+      <div style="font-size: 0.95rem; font-weight: 800; background: rgba(255,255,255,0.22); backdrop-filter: blur(10px); padding: 6px 20px; border-radius: 50px; display: inline-block; border: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        🎓 ଓଡ଼ିଶା SCERT ପ୍ରାଥମିକ ଶିକ୍ଷା ପୋର୍ଟାଲ୍
+      </div>
+      <h1 style="font-size: 2.5rem; font-weight: 900; color: #FFFFFF; text-shadow: 0 6px 16px rgba(0,0,0,0.25); margin: 0; line-height: 1.2;">
+        🎈 ସ୍ୱାଗତମ! Welcome Kids! 🎉
+      </h1>
+    </div>
+
+    <!-- Center Mascot Characters & Welcome Speech Bubble -->
+    <div class="intro-characters-container" style="z-index: 2005; position: relative; margin: 15px 0; text-align: center; width: 100%;">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap;">
+        
+        <!-- Mascot 1: Guplu Lion -->
+        <div class="guplu" style="font-size: 5.5rem; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.3)); cursor: pointer;" title="ଗୁପ୍ଲୁ (Guplu Lion)">
+          🦁
+        </div>
+
+        <!-- Central Odia Speech Bubble Card -->
+        <div class="intro-text-box animate-pop" style="background: #FFFFFF; color: #1E293B; border-radius: 28px; padding: 26px 30px; max-width: 380px; box-shadow: 0 24px 48px rgba(0,0,0,0.25); border: 4px solid #FDE047; position: relative;">
+          <div style="font-size: 2rem; margin-bottom: 6px;">🎮✨</div>
+          <h2 style="font-size: 1.45rem; font-weight: 900; color: #4F46E5; margin: 0 0 8px 0;">
+            ଓଡ଼ିଆ ମାଧ୍ୟମ Learning Games
+          </h2>
+          <p style="font-size: 1.05rem; color: #475569; font-weight: 700; margin: 0 0 16px 0; line-height: 1.5;">
+            ଆସ ଖେଳିବା, ଶିଖିବା ଓ ବହୁତ ସାରା ଷ୍ଟାର୍ (Stars) ଜିତିବା! 🌟
+          </p>
+          <div style="display: flex; justify-content: center; gap: 8px; font-size: 0.85rem; font-weight: 800; flex-wrap: wrap;">
+            <span style="background: #EEF2FF; color: #4F46E5; padding: 5px 12px; border-radius: 50px;">📚 ଓଡ଼ିଆ</span>
+            <span style="background: #ECFDF5; color: #059669; padding: 5px 12px; border-radius: 50px;">🔢 ଗଣିତ</span>
+            <span style="background: #FEF3C7; color: #D97706; padding: 5px 12px; border-radius: 50px;">🎨 ପରିବେଶ</span>
+          </div>
+        </div>
+
+        <!-- Mascot 2: Neelu Elephant -->
+        <div class="neelu" style="font-size: 5.5rem; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.3)); cursor: pointer;" title="ନୀଲୁ (Neelu Elephant)">
+          🐘
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom Big Action Call-To-Action Button -->
+    <div style="z-index: 2005; position: relative; margin-bottom: 25px; text-align: center;">
+      <button id="intro-cta-btn" class="intro-cta-btn" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: 3.5px solid #A7F3D0; font-weight: 900; font-size: 1.35rem; padding: 16px 44px; border-radius: 50px; box-shadow: 0 14px 32px rgba(16, 185, 129, 0.45); cursor: pointer; transition: all 0.2s ease;">
+        🚀 ଖେଳ ଆରମ୍ଭ କରନ୍ତୁ! (Start Games) 🎮
+      </button>
+    </div>
+  </div>
+
+
+  <!-- Victory Celebration Overlay Modal -->
+  <div id="victory-modal" class="modal-container hidden"></div>
+
+  <!-- JavaScript Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/welcomeIntro.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

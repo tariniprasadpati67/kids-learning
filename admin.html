@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="or">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard & Textbook Import — SCERT Odisha</title>
+  <meta name="description" content="Admin dashboard to manage and import official Odisha SCERT primary textbooks Class 1-5">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --admin-sidebar-bg: #1e1e2e;
+      --admin-header-bg: #2a2a3e;
+      --admin-accent: #667eea;
+      --admin-success: #10AC84;
+      --admin-danger: #EE5253;
+      --admin-text: #e2e8f0;
+      --admin-text-muted: #94a3b8;
+      --admin-card: #2d2d44;
+      --admin-border: #3d3d5c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Baloo Bhaina 2', sans-serif;
+      background: #12121e;
+      color: var(--admin-text);
+      min-height: 100vh;
+    }
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    .admin-sidebar {
+      background: var(--admin-sidebar-bg);
+      border-right: 1px solid var(--admin-border);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--admin-border);
+      font-size: 1rem;
+      font-weight: 800;
+      background: var(--admin-header-bg);
+      color: #FFFFFF;
+    }
+    .sidebar-nav { padding: 16px 0; }
+    .sidebar-nav button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--admin-text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .sidebar-nav button:hover, .sidebar-nav button.active {
+      background: rgba(102,126,234,0.15);
+      color: var(--admin-accent);
+      border-left-color: var(--admin-accent);
+    }
+
+    .admin-content { padding: 0; background: #12121e; overflow-y: auto; }
+    .admin-topbar {
+      background: var(--admin-header-bg);
+      border-bottom: 1px solid var(--admin-border);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .admin-page-title { font-size: 1.1rem; font-weight: 700; }
+    .admin-body { padding: 28px; }
+
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .admin-stat-card {
+      background: var(--admin-card);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--admin-border);
+    }
+    .admin-stat-number { font-size: 1.8rem; font-weight: 800; color: var(--admin-accent); }
+    .admin-stat-label { font-size: 0.8rem; color: var(--admin-text-muted); margin-top: 4px; }
+
+    .admin-card {
+      background: var(--admin-card);
+      border-radius: 16px;
+      border: 1px solid var(--admin-border);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* Hierarchy Tree View */
+    .tree-class-block {
+      background: #1a1a2e;
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .tree-class-header {
+      background: rgba(102,126,234,0.12);
+      padding: 14px 18px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tree-body { padding: 14px 18px; }
+    .tree-book-node { margin-left: 16px; border-left: 2px solid var(--admin-accent); padding-left: 14px; margin-bottom: 12px; }
+    .tree-chapter-node { margin-left: 16px; border-left: 2px solid #10AC84; padding-left: 14px; margin-bottom: 8px; }
+    .tree-topic-node { margin-left: 16px; border-left: 2px solid #FFB800; padding-left: 14px; margin-bottom: 6px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .form-label { font-size: 0.85rem; color: var(--admin-text-muted); font-weight: 600; }
+    .form-control {
+      background: #1a1a2e;
+      border: 1.5px solid var(--admin-border);
+      border-radius: 8px;
+      color: white;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--admin-accent); }
+    textarea.form-control { min-height: 120px; font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <div class="admin-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-logo">
+        📚 SCERT Admin Dashboard
+      </div>
+      <nav class="sidebar-nav">
+        <button id="nav-btn-dashboard" class="active" onclick="adminManager.showTab('tab-dashboard')">
+          <span>📊</span> Overview & Metrics
+        </button>
+        <button id="nav-btn-tree" onclick="adminManager.showTab('tab-tree')">
+          <span>🌳</span> Textbook Dashboard Tree
+        </button>
+        <button id="nav-btn-import" onclick="adminManager.showTab('tab-import')">
+          <span>📥</span> Import Textbook Data
+        </button>
+        <button id="nav-btn-questions" onclick="adminManager.showTab('tab-questions')">
+          <span>❓</span> Manage Questions
+        </button>
+      </nav>
+      <div style="padding: 20px;">
+        <a href="index.html" class="btn btn-outline btn-sm" style="width: 100%; text-align: center;">🏠 Back to App</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-content">
+      <div class="admin-topbar">
+        <h1 class="admin-page-title">Odisha SCERT Primary Textbook Management Panel</h1>
+        <span style="color: var(--admin-accent); font-weight: 700;">👨‍🏫 Admin Mode</span>
+      </div>
+
+      <div class="admin-body">
+
+        <!-- TAB 1: OVERVIEW & METRICS -->
+        <section id="tab-dashboard" class="admin-tab-page">
+          <h2 style="margin-bottom: 20px; font-size: 1.3rem;">📊 Overview Metrics</h2>
+          <div class="admin-stats-grid">
+            <div class="admin-stat-card">
+              <div class="admin-stat-number" id="admin-stat-books">0</div>
+              <div class="admin-stat-label">Textbooks</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-number" id="admin-stat-chapters">0</div>
+              <div class="admin-stat-label">Chapters</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-number" id="admin-stat-topics">0</div>
+              <div class="admin-stat-label">Topics</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-number" id="admin-stat-questions">0</div>
+              <div class="admin-stat-label">Questions</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: TEXTBOOK DASHBOARD TREE -->
+        <section id="tab-tree" class="admin-tab-page" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="font-size: 1.3rem;">🌳 SCERT Odisha Textbook Structure (Class 1 to 5)</h2>
+            <button class="btn btn-primary btn-sm" onclick="adminManager.loadTextbookTree()">🔄 Refresh Hierarchy</button>
+          </div>
+          <div id="tree-container">
+            <div style="text-align:center; padding:30px;">Loading Textbook Hierarchy Tree...</div>
+          </div>
+        </section>
+
+        <!-- TAB 3: IMPORT TEXTBOOK DATA -->
+        <section id="tab-import" class="admin-tab-page" style="display: none;">
+          <h2 style="margin-bottom: 12px; font-size: 1.3rem;">📥 Admin Textbook Data Import</h2>
+          <p style="color: var(--admin-text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+            Import verified SCERT Odisha textbook data (PDF text, JSON, CSV or Manual Entry). Every record will be saved with classId, subjectId, bookId, chapterId, topicId, and lessonId.
+          </p>
+
+          <div class="admin-card">
+            <form id="form-import-textbook">
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label class="form-label">Select Class *</label>
+                  <select id="import-class-num" class="form-control" required>
+                    <option value="1">Class 1 (ଶ୍ରେଣୀ ୧)</option>
+                    <option value="2">Class 2 (ଶ୍ରେଣୀ ୨)</option>
+                    <option value="3">Class 3 (ଶ୍ରେଣୀ ୩)</option>
+                    <option value="4">Class 4 (ଶ୍ରେଣୀ ୪)</option>
+                    <option value="5">Class 5 (ଶ୍ରେଣୀ ୫)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Subject Name *</label>
+                  <input type="text" id="import-subject-name" class="form-control" placeholder="e.g. ଓଡ଼ିଆ / ଗଣିତ / English" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Book Name (Official SCERT Title) *</label>
+                  <input type="text" id="import-book-title" class="form-control" placeholder="e.g. ସାହିତ୍ୟ କଳିକା / ଗଣିତ ମଜା / ହସଖୁସି" required>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 14px;">
+                <label class="form-label">Import Format</label>
+                <select id="import-format-type" class="form-control" onchange="adminManager.onImportTypeChange(this.value)">
+                  <option value="json">JSON Structure (Recommended)</option>
+                  <option value="manual">Manual Form Entry</option>
+                </select>
+              </div>
+
+              <div id="json-input-area" class="form-group" style="margin-top: 14px;">
+                <label class="form-label">Textbook Data Payload (Chapters, Topics, Lessons & Questions JSON) *</label>
+                <textarea id="import-json-payload" class="form-control" placeholder='[
+  {
+    "chapterNumber": 1,
+    "title": "ଅଧ୍ୟାୟ ୧ - ସ୍ୱରବର୍ଣ୍ଣ",
+    "topics": [
+      {
+        "topicNumber": 1,
+        "title": "ଅ ରୁ ଅଃ ସ୍ୱରବର୍ଣ୍ଣ",
+        "lessons": [
+          {
+            "title": "ଅ ରୁ ଅଃ ଶିକ୍ଷା",
+            "content": "ଅ- ଅନାର, ଆ- ଆମ୍ବ",
+            "questions": [
+              {
+                "question": "ଅ ରୁ କେଉଁ ଶବ୍ଦ ଆରମ୍ଭ ହୁଏ?",
+                "options": ["ଆମ୍ବ", "ଅନାର", "ଇଟା"],
+                "correctAnswer": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]'></textarea>
+              </div>
+
+              <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 24px; font-weight: 700;">
+                  🚀 Verify, Approve & Publish Textbook Content
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- TAB 4: MANAGE QUESTIONS -->
+        <section id="tab-questions" class="admin-tab-page" style="display: none;">
+          <h2 style="margin-bottom: 20px; font-size: 1.3rem;">❓ Question Bank Management</h2>
+          <div class="admin-card">
+            <div id="admin-questions-list">
+              <p style="text-align:center; padding:16px;">Loading questions...</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
