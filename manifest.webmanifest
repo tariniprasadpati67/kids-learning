@@ -1,0 +1,21 @@
+{
+  "name": "ଓଡ଼ିଆ ମାଧ୍ୟମ Learning Games",
+  "short_name": "Odia Games",
+  "description": "ଓଡ଼ିଆ ମାଧ୍ୟମ ପ୍ରଥମ ରୁ ପଞ୍ଚମ ଶ୍ରେଣୀ ଶିକ୍ଷଣୀୟ ଖେଳ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#FF6B6B",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -440,7 +440,7 @@ class AppController {
         questions: [
           { question: "'ଅ' ଅକ୍ଷରରୁ କେଉଁ ଶବ୍ଦଟି ଆରମ୍ଭ ହୁଏ?", options: ['ଆମ୍ବ', 'ଅନାର', 'ଇଟା', 'ଉଠ'], correctAnswer: 1 },
           { question: "'ଆ' ଅକ୍ଷରରୁ କେଉଁ ଫଳର ନାମ ଆରମ୍ଭ ହୁଏ?", options: ['ଓଲ', 'ଇଟା', 'ଆମ୍ବ', 'ଅସୁର'], correctAnswer: 2 },
-          { question: "୫ + ୩ = କେତେ?", options: ['୭', '୮', '<ctrl42>', '୧୦'], correctAnswer: 1 },
+          { question: "୫ + ୩ = କେତେ?", options: ['୭', '୮', '୯', '୧୦'], correctAnswer: 1 },
           { question: "ଆକାଶର ରଙ୍ଗ କ’ଣ?", options: ['ଲାଲ୍', 'ନୀଳ', 'ହଳଦିଆ', 'କଳା'], correctAnswer: 1 },
           { question: "🍎 ଏହି ଚିତ୍ରଟି କେଉଁ ଫଳର?", options: ['କଦଳୀ', 'ଆପଲ୍', 'କମଳା', 'ଅଙ୍ଗୁର'], correctAnswer: 1 }
         ]
